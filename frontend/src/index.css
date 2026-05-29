@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --agro-verde: #2d6a4f;
+    --agro-verde-claro: #52b788;
+    --agro-marron: #8b6914;
+    --agro-crema: #f5f0e8;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-[color:var(--agro-crema)] text-slate-800;
+  }
+}
