@@ -105,3 +105,103 @@ Todas las rutas `/api/*` (excepto `/api/auth/login` y `/api/health`) requieren h
 - **Soft delete**: `DELETE /api/animales/:id` marca `activo: false`.
 - **Cron** (node-cron): cada día a las 06:00 y al iniciar, pasa hembras gestantes a `preparto` si faltan ≤15 días para el parto.
 - **Cloudinary**: opcional; sin credenciales el sistema funciona igual (sin subida de fotos).
+
+## Despliegue a producción
+
+Arquitectura recomendada:
+
+- **Backend**: Render Web Service (`backend/`)
+- **Frontend**: Vercel (`frontend/`)
+- **Base de datos**: MongoDB Atlas
+- **Imágenes**: Cloudinary
+
+### 1. MongoDB Atlas
+
+En Atlas:
+
+1. Crear cluster.
+2. Crear usuario en **Database Access**.
+3. En **Network Access**, permitir acceso desde Render. Para empezar en free tier podés usar `0.0.0.0/0`.
+4. Copiar la URI:
+
+```env
+mongodb+srv://USUARIO:PASSWORD@cluster0.xxxxx.mongodb.net/agrotrack?retryWrites=true&w=majority
+```
+
+### 2. Backend en Render
+
+Opción A: usar `render.yaml` desde el repo.
+
+Opción B: crear servicio manual:
+
+- **Service Type**: Web Service
+- **Root Directory**: `backend`
+- **Runtime**: Node
+- **Build Command**: `npm install`
+- **Start Command**: `npm start`
+- **Health Check Path**: `/api/health`
+
+Variables de entorno en Render:
+
+```env
+NODE_ENV=production
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=generar_un_secreto_largo_minimo_32_caracteres
+JWT_EXPIRES_IN=7d
+ADMIN_USER=admin
+ADMIN_PASS=contraseña_segura
+FRONTEND_URL=https://tu-frontend.vercel.app
+ALLOW_VERCEL_PREVIEWS=false
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+```
+
+Cuando Render termine, probá:
+
+```text
+https://tu-backend.onrender.com/api/health
+```
+
+### 3. Frontend en Vercel
+
+En Vercel:
+
+- **Root Directory**: `frontend`
+- **Framework Preset**: Vite
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+
+Variable de entorno:
+
+```env
+VITE_API_URL=https://tu-backend.onrender.com
+```
+
+Después de obtener la URL final de Vercel, volver a Render y actualizar:
+
+```env
+FRONTEND_URL=https://tu-frontend.vercel.app
+```
+
+Luego redeploy del backend.
+
+### 4. Seed en producción
+
+Ejecutar seed solo si querés cargar datos demo en la base de producción.
+
+En Render podés abrir **Shell** y correr:
+
+```bash
+npm run seed
+```
+
+Si preferís no cargar demo, creá animales desde la app.
+
+### 5. Checklist final
+
+- `/api/health` responde en Render.
+- Vercel tiene `VITE_API_URL` con la URL de Render.
+- Render tiene `FRONTEND_URL` con la URL de Vercel.
+- MongoDB Atlas permite conexiones desde Render.
+- `.env` real no está versionado.

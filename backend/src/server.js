@@ -10,9 +10,33 @@ dotenv.config();
 
 const app = express();
 
+function parseOrigins(value) {
+  return (value || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+const allowedOrigins = [
+  ...parseOrigins(process.env.FRONTEND_URLS),
+  ...parseOrigins(process.env.FRONTEND_URL),
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (
+        process.env.ALLOW_VERCEL_PREVIEWS === "true" &&
+        /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin)
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error(`Origen no permitido por CORS: ${origin}`));
+    },
     credentials: true,
   })
 );
