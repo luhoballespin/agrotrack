@@ -34,7 +34,7 @@ export default function LoginPage() {
                 await login(username, password);
                 navigate("/dashboard");
               } catch (err) {
-                setError(err?.message || "No se pudo iniciar sesión");
+                setError(err?.response?.data?.message || err?.message || "No se pudo iniciar sesión");
               } finally {
                 setLoading(false);
               }
@@ -71,7 +71,7 @@ export default function LoginPage() {
         </div>
 
         <div className="text-center text-xs text-slate-500">
-          Backend esperado en <code>VITE_API_URL</code> (default: http://localhost:5000)
+          Backend configurado en <code>VITE_API_URL</code>
         </div>
       </div>
     </div>
