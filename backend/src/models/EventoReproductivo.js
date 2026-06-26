@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const EventoReproductivoSchema = new mongoose.Schema(
   {
+    ownerId: { type: String, required: true, index: true },
     animalId: { type: mongoose.Schema.Types.ObjectId, ref: "Animal", required: true, index: true },
     tipo: {
       type: String,
@@ -25,6 +26,8 @@ const EventoReproductivoSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+EventoReproductivoSchema.index({ ownerId: 1, animalId: 1, fecha: -1 });
 
 module.exports = mongoose.model("EventoReproductivo", EventoReproductivoSchema);
 

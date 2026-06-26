@@ -39,16 +39,7 @@ cd backend && npm install
 cd ../frontend && npm install
 ```
 
-## 3. Cargar datos de prueba (seed)
-
-```bash
-cd backend
-npm run seed
-```
-
-Crea **12 animales** (3 por especie), pesos, eventos sanitarios/reproductivos y un plan de alimentación.
-
-## 4. Levantar servidores
+## 3. Levantar servidores
 
 **Terminal 1 – Backend:**
 
@@ -68,13 +59,13 @@ npm run dev
 
 Abrí: http://localhost:5173
 
-## 5. Probar el flujo completo
+## 4. Probar el flujo completo
 
 | Paso | Acción |
 |------|--------|
-| 1 | Login con `ADMIN_USER` / `ADMIN_PASS` del `.env` |
-| 2 | **Dashboard**: alertas rojas/naranjas, totales por especie, partos y celo |
-| 3 | **Animales**: filtros por especie/sexo/estado; abrir un animal |
+| 1 | Crear una cuenta o ingresar con `ADMIN_USER` / `ADMIN_PASS` del `.env` |
+| 2 | Crear animales reales desde **Animales** |
+| 3 | **Dashboard**: alertas rojas/naranjas, totales por especie, partos y celo solo del usuario autenticado |
 | 4 | **Perfil animal**: registrar peso, evento sanitario, celo/servicio/parto |
 | 5 | Al registrar **servicio/IA**: ver fecha probable de parto (preview + guardado) |
 | 6 | **Sanitario**: timeline + calendario predefinido por especie |
@@ -96,13 +87,14 @@ Abrí: http://localhost:5173
 | POST/GET | `/api/alimentacion/:animalId` |
 | GET | `/api/calendario-sanitario?especie=bovino` |
 
-Todas las rutas `/api/*` (excepto `/api/auth/login` y `/api/health`) requieren header:
+Todas las rutas `/api/*` (excepto `/api/auth/login`, `/api/auth/register` y `/api/health`) requieren header:
 
 `Authorization: Bearer <token>`
 
 ## Notas
 
 - **Soft delete**: `DELETE /api/animales/:id` marca `activo: false`.
+- **Datos por usuario**: cada usuario solo ve y modifica sus propios animales y registros asociados.
 - **Cron** (node-cron): cada día a las 06:00 y al iniciar, pasa hembras gestantes a `preparto` si faltan ≤15 días para el parto.
 - **Cloudinary**: opcional; sin credenciales el sistema funciona igual (sin subida de fotos).
 
@@ -151,7 +143,7 @@ JWT_EXPIRES_IN=7d
 ADMIN_USER=admin
 ADMIN_PASS=contraseña_segura
 FRONTEND_URL=https://tu-frontend.vercel.app
-ALLOW_VERCEL_PREVIEWS=false
+ALLOW_VERCEL_PREVIEWS=true
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
@@ -186,19 +178,7 @@ FRONTEND_URL=https://tu-frontend.vercel.app
 
 Luego redeploy del backend.
 
-### 4. Seed en producción
-
-Ejecutar seed solo si querés cargar datos demo en la base de producción.
-
-En Render podés abrir **Shell** y correr:
-
-```bash
-npm run seed
-```
-
-Si preferís no cargar demo, creá animales desde la app.
-
-### 5. Checklist final
+### 4. Checklist final
 
 - `/api/health` responde en Render.
 - Vercel tiene `VITE_API_URL` con la URL de Render.

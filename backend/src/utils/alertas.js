@@ -1,5 +1,6 @@
 const { REPRODUCCION } = require("./constantesReproduccion");
 const { addDays, diffInDays, startOfDay } = require("./date");
+const { ownerFilter } = require("./ownership");
 
 const PRIORIDAD = {
   rojo: 3,
@@ -218,12 +219,13 @@ function generarAlertasDesparasitacion(hembrasOMachos, ultimoDespaByAnimalId, ho
   return alertas;
 }
 
-async function generarAlertas(models, hoy = new Date()) {
+async function generarAlertas(models, hoy = new Date(), req = null) {
   const { Animal, EventoSanitario } = models;
-  const animales = await Animal.find({ activo: true }).lean();
+  const animales = await Animal.find(ownerFilter(req, { activo: true })).lean();
   const hembras = animales.filter((a) => a.sexo === "hembra");
 
   const eventosSan = await EventoSanitario.find({
+    ownerId: ownerFilter(req).ownerId,
     animalId: { $in: animales.map((a) => a._id) },
     fechaProxima: { $exists: true, $ne: null },
   })
@@ -235,7 +237,7 @@ async function generarAlertas(models, hoy = new Date()) {
   }
 
   const ultDespaAgg = await EventoSanitario.aggregate([
-    { $match: { tipo: "desparasitacion", animalId: { $in: animales.map((a) => a._id) } } },
+    { $match: { ownerId: ownerFilter(req).ownerId, tipo: "desparasitacion", animalId: { $in: animales.map((a) => a._id) } } },
     { $sort: { fecha: -1 } },
     { $group: { _id: "$animalId", fecha: { $first: "$fecha" } } },
   ]);

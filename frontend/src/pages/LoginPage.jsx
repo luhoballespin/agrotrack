@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
@@ -72,6 +72,12 @@ export default function LoginPage() {
 
         <div className="text-center text-xs text-slate-500">
           Backend configurado en <code>VITE_API_URL</code>
+        </div>
+        <div className="text-center text-sm text-slate-600">
+          ¿No tenés cuenta?{" "}
+          <Link className="font-semibold text-[color:var(--agro-verde)] hover:underline" to="/register">
+            Crear cuenta
+          </Link>
         </div>
       </div>
     </div>

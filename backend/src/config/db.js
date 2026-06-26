@@ -67,7 +67,7 @@ async function connectDB() {
     console.error("  ATLAS: tu IP no está permitida (Network Access)");
     console.error("  1. https://cloud.mongodb.com → Network Access");
     console.error("  2. Add IP Address → Allow Access from Anywhere (0.0.0.0/0)");
-    console.error("  3. Esperar 1-2 min y volver a ejecutar npm run seed");
+    console.error("  3. Esperar 1-2 min y volver a iniciar el backend");
     console.error("══════════════════════════════════════════════════\n");
   }
 

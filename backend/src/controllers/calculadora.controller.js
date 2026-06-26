@@ -2,13 +2,14 @@ const Animal = require("../models/Animal");
 const { ok, fail } = require("../utils/response");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { calcularPlan } = require("../utils/calculadoraAlimento");
+const { ownerFilter } = require("../utils/ownership");
 
 const calcular = asyncHandler(async (req, res) => {
   const body = req.body || {};
   let { pesoActual, pesoObjetivo, diasDisponibles, especie, modo, objetivo, animalId } = body;
 
   if (animalId) {
-    const animal = await Animal.findById(animalId).lean();
+    const animal = await Animal.findOne(ownerFilter(req, { _id: animalId })).lean();
     if (!animal) return fail(res, 404, "Animal no encontrado");
     if (!["bovino", "porcino"].includes(animal.especie)) {
       return fail(res, 400, "La calculadora solo aplica a bovinos y porcinos");

@@ -14,7 +14,7 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: ALLOW_VERCEL_PREVIEWS
-        value: false
+        value: true
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET

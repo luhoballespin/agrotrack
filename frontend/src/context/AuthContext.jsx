@@ -18,12 +18,21 @@ export function AuthProvider({ children }) {
       return t;
     }
 
+    async function register(userData) {
+      const res = await api.post("/api/auth/register", userData);
+      const t = res?.data?.data?.token;
+      if (!t) throw new Error(res?.data?.message || "Registro falló");
+      localStorage.setItem("agrotrack_token", t);
+      setToken(t);
+      return t;
+    }
+
     function logout() {
       localStorage.removeItem("agrotrack_token");
       setToken(null);
     }
 
-    return { token, isAuthenticated, login, logout };
+    return { token, isAuthenticated, login, register, logout };
   }, [token]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

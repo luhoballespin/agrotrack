@@ -3,10 +3,14 @@ const EventoReproductivo = require("../models/EventoReproductivo");
 const { ok, fail } = require("../utils/response");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { calcularProbableParto } = require("../utils/reproduccion");
+const { getOwnerId, ownerFilter } = require("../utils/ownership");
 
 const listReproductivoByAnimal = asyncHandler(async (req, res) => {
   const { animalId } = req.params;
-  const items = await EventoReproductivo.find({ animalId }).sort({ fecha: -1 }).lean();
+  const animal = await Animal.findOne(ownerFilter(req, { _id: animalId })).lean();
+  if (!animal) return fail(res, 404, "Animal no encontrado");
+
+  const items = await EventoReproductivo.find(ownerFilter(req, { animalId })).sort({ fecha: -1 }).lean();
   return ok(res, items, "Historial reproductivo");
 });
 
@@ -17,11 +21,12 @@ const createEventoReproductivo = asyncHandler(async (req, res) => {
   if (!tipo) return fail(res, 400, "tipo es requerido");
   if (!fecha) return fail(res, 400, "fecha es requerida");
 
-  const animal = await Animal.findById(animalId);
+  const animal = await Animal.findOne(ownerFilter(req, { _id: animalId }));
   if (!animal) return fail(res, 404, "Animal no encontrado");
 
   const evt = await EventoReproductivo.create({
     ...body,
+    ownerId: getOwnerId(req),
     fecha: new Date(fecha),
   });
 
@@ -65,7 +70,7 @@ const createEventoReproductivo = asyncHandler(async (req, res) => {
 // Endpoint solicitado: PUT /api/animales/:id/reproduccion
 const updateReproduccionAnimal = asyncHandler(async (req, res) => {
   const body = req.body || {};
-  const animal = await Animal.findById(req.params.id);
+  const animal = await Animal.findOne(ownerFilter(req, { _id: req.params.id }));
   if (!animal) return fail(res, 404, "Animal no encontrado");
   if (animal.sexo !== "hembra") return fail(res, 400, "Solo aplica a hembras");
 

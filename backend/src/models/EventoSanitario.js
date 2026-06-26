@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const EventoSanitarioSchema = new mongoose.Schema(
   {
+    ownerId: { type: String, required: true, index: true },
     animalId: { type: mongoose.Schema.Types.ObjectId, ref: "Animal", required: true, index: true },
     especie: { type: String, enum: ["bovino", "equino", "ovino", "porcino"], required: true, index: true },
     tipo: {
@@ -20,7 +21,7 @@ const EventoSanitarioSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-EventoSanitarioSchema.index({ fechaProxima: 1, especie: 1 });
+EventoSanitarioSchema.index({ ownerId: 1, fechaProxima: 1, especie: 1 });
 
 module.exports = mongoose.model("EventoSanitario", EventoSanitarioSchema);
 

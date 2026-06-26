@@ -13,6 +13,7 @@ const EtapaSchema = new mongoose.Schema(
 
 const PlanAlimentacionSchema = new mongoose.Schema(
   {
+    ownerId: { type: String, required: true, index: true },
     animalId: { type: mongoose.Schema.Types.ObjectId, ref: "Animal", required: true, index: true },
     especie: { type: String, enum: ["bovino", "porcino"], required: true, index: true },
     pesoInicial: { type: Number, min: 0 },
@@ -28,7 +29,7 @@ const PlanAlimentacionSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-PlanAlimentacionSchema.index({ animalId: 1, activo: 1 });
+PlanAlimentacionSchema.index({ ownerId: 1, animalId: 1, activo: 1 });
 
 module.exports = mongoose.model("PlanAlimentacion", PlanAlimentacionSchema);
 

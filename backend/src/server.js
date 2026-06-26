@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
 
 const { connectDB } = require("./config/db");
 const { initCloudinary } = require("./config/cloudinary");
@@ -9,6 +11,7 @@ const { fail, ok } = require("./utils/response");
 dotenv.config();
 
 const app = express();
+app.disable("x-powered-by");
 
 function parseOrigins(value) {
   return (value || "")
@@ -40,7 +43,9 @@ app.use(
     credentials: true,
   })
 );
+app.use(helmet());
 app.use(express.json({ limit: "2mb" }));
+app.use(mongoSanitize({ replaceWith: "_" }));
 
 app.get("/api/health", (req, res) => ok(res, { status: "ok" }, "AgroTrack OK"));
 
@@ -72,7 +77,11 @@ app.use((req, res) => fail(res, 404, "Ruta no encontrada"));
 
 app.use((err, req, res, next) => {
   console.error(err);
-  return fail(res, err.status || 500, err.message || "Error interno");
+  const status = err.status || 500;
+  const message = status >= 500 && process.env.NODE_ENV === "production"
+    ? "Error interno"
+    : err.message || "Error interno";
+  return fail(res, status, message);
 });
 
 async function start() {

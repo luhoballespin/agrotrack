@@ -2,6 +2,8 @@ const mongoose = require("mongoose");
 
 const AnimalSchema = new mongoose.Schema(
   {
+    ownerId: { type: String, required: true, index: true },
+
     especie: {
       type: String,
       enum: ["bovino", "equino", "ovino", "porcino"],
@@ -72,11 +74,11 @@ const AnimalSchema = new mongoose.Schema(
 
 // Unicidad de caravana por especie (solo si existe numeroCaravana)
 AnimalSchema.index(
-  { especie: 1, numeroCaravana: 1 },
+  { ownerId: 1, especie: 1, numeroCaravana: 1 },
   { unique: true, partialFilterExpression: { numeroCaravana: { $type: "string" } } }
 );
-AnimalSchema.index({ activo: 1, especie: 1, estadoReproductivo: 1 });
-AnimalSchema.index({ fechaProbableParto: 1 });
+AnimalSchema.index({ ownerId: 1, activo: 1, especie: 1, estadoReproductivo: 1 });
+AnimalSchema.index({ ownerId: 1, fechaProbableParto: 1 });
 
 module.exports = mongoose.model("Animal", AnimalSchema);
 

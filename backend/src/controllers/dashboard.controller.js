@@ -4,11 +4,12 @@ const RegistroPeso = require("../models/RegistroPeso");
 const { ok } = require("../utils/response");
 const { asyncHandler } = require("../utils/asyncHandler");
 const { generarAlertas } = require("../utils/alertas");
+const { ownerFilter } = require("../utils/ownership");
 
 const getDashboard = asyncHandler(async (req, res) => {
   const hoy = new Date();
 
-  const animales = await Animal.find({ activo: true }).lean();
+  const animales = await Animal.find(ownerFilter(req, { activo: true })).lean();
   const hembras = animales.filter((a) => a.sexo === "hembra");
 
   const totalPorEspecie = animales.reduce((acc, a) => {
@@ -17,7 +18,7 @@ const getDashboard = asyncHandler(async (req, res) => {
   }, {});
 
   const { alertasSanitarias, alertasReproductivas, alertasGenerales, alertasTodas } =
-    await generarAlertas({ Animal, EventoSanitario }, hoy);
+    await generarAlertas({ Animal, EventoSanitario }, hoy, req);
 
   const proximosPartos = hembras
     .filter(
@@ -29,7 +30,7 @@ const getDashboard = asyncHandler(async (req, res) => {
 
   const animalesEnCelo = hembras.filter((h) => h.estadoReproductivo === "en_celo").slice(0, 50);
 
-  const ultimosRegistrosPeso = await RegistroPeso.find({})
+  const ultimosRegistrosPeso = await RegistroPeso.find(ownerFilter(req))
     .sort({ fecha: -1 })
     .limit(20)
     .lean();

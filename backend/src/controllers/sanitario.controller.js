@@ -2,12 +2,13 @@ const EventoSanitario = require("../models/EventoSanitario");
 const Animal = require("../models/Animal");
 const { ok, fail } = require("../utils/response");
 const { asyncHandler } = require("../utils/asyncHandler");
+const { getOwnerId, ownerFilter } = require("../utils/ownership");
 
 const listSanitario = asyncHandler(async (req, res) => {
   const { animalId, especie } = req.query;
   const proximosDias = req.query.proximosDias ? Number(req.query.proximosDias) : null;
 
-  const filter = {};
+  const filter = ownerFilter(req);
   if (animalId) filter.animalId = animalId;
   if (especie) filter.especie = especie;
 
@@ -28,11 +29,12 @@ const createSanitario = asyncHandler(async (req, res) => {
   if (!tipo) return fail(res, 400, "tipo es requerido");
   if (!fecha) return fail(res, 400, "fecha es requerida");
 
-  const animal = await Animal.findById(animalId).lean();
+  const animal = await Animal.findOne(ownerFilter(req, { _id: animalId })).lean();
   if (!animal) return fail(res, 404, "Animal no encontrado");
 
   const doc = await EventoSanitario.create({
     ...body,
+    ownerId: getOwnerId(req),
     especie: animal.especie,
     fecha: new Date(fecha),
     fechaProxima: body.fechaProxima ? new Date(body.fechaProxima) : undefined,
@@ -43,8 +45,14 @@ const createSanitario = asyncHandler(async (req, res) => {
 
 const updateSanitario = asyncHandler(async (req, res) => {
   const body = req.body || {};
-  const doc = await EventoSanitario.findById(req.params.id);
+  const doc = await EventoSanitario.findOne(ownerFilter(req, { _id: req.params.id }));
   if (!doc) return fail(res, 404, "Evento no encontrado");
+
+  delete body.ownerId;
+  delete body.animalId;
+  delete body.especie;
+  delete body.createdAt;
+  delete body.updatedAt;
 
   if (body.fecha) body.fecha = new Date(body.fecha);
   if (body.fechaProxima) body.fechaProxima = new Date(body.fechaProxima);
@@ -55,7 +63,7 @@ const updateSanitario = asyncHandler(async (req, res) => {
 });
 
 const deleteSanitario = asyncHandler(async (req, res) => {
-  const doc = await EventoSanitario.findById(req.params.id);
+  const doc = await EventoSanitario.findOne(ownerFilter(req, { _id: req.params.id }));
   if (!doc) return fail(res, 404, "Evento no encontrado");
   await doc.deleteOne();
   return ok(res, true, "Evento sanitario eliminado");
