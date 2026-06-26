@@ -26,7 +26,7 @@ export default function AppLayout() {
             <div className="text-sm font-semibold text-[color:var(--agro-verde)]">
               AgroTrack
             </div>
-            <div className="text-xs text-slate-500">Gestión ganadera</div>
+            <div className="text-xs text-slate-500">Gestión Animal</div>
           </button>
           <button
             type="button"
